@@ -5,15 +5,20 @@ USER root
 ARG GO_VERSION
 
 RUN test "${GO_VERSION}" || (echo Please set GO_VERSION && false) \
+ && case "$(uname -m)" in \
+        x86_64) ARCH=amd64 ;; \
+        aarch64) ARCH=arm64 ;; \
+        *) echo not supported; false ;; \
+    esac \
  && DEBIAN_FRONTEND=noninteractive \
  && apt-get update -qq \
  && apt-get dist-upgrade -y -qq \
  && apt-get install -y -qq build-essential \
  && cd /tmp \
- && wget --quiet https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz \
+ && wget --quiet https://go.dev/dl/go${GO_VERSION}.linux-${ARCH}.tar.gz \
  && cd /usr/local \
- && tar zxf /tmp/go${GO_VERSION}.linux-amd64.tar.gz \
- && rm /tmp/go${GO_VERSION}.linux-amd64.tar.gz \
+ && tar zxf /tmp/go${GO_VERSION}.linux-${ARCH}.tar.gz \
+ && rm /tmp/go${GO_VERSION}.linux-${ARCH}.tar.gz \
  && ln -fns /usr/local/go/bin/* /usr/local/bin/ \
  && su coder -c "code-server --install-extension golang.go" \
  && su coder -c "go install golang.org/x/tools/gopls@latest" \
