@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+GO_VERSION=$1
+PUBLISH_LATEST=${2:-yes}
+if [ "${PUBLISH_LATEST}" == "yes" ]; then
+    EXTRA_FLAG="-t hangxie/go-code-server:latest"
+else
+    EXTRA_FLAG=""
+fi
+
 docker pull codercom/code-server:latest
 
 docker context ls | grep multi-platform > /dev/null || \
@@ -16,5 +24,5 @@ docker buildx build \
     --platform linux/amd64,linux/arm64 \
     -t hangxie/go-code-server:$1 \
     -t hangxie/go-code-server:$(echo $1 | cut -f 1-2 -d .) \
-    -t hangxie/go-code-server:latest \
+    ${EXTRA_FLAG} \
     .
